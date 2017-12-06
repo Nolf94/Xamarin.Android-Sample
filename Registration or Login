@@ -1,0 +1,97 @@
+async public void LoginOrRegister(object sender, EventArgs e)
+        {
+            //Set a circle spinner loading while account is login or register
+            _progress = new ProgressDialog(this, Resource.Style.ProgressDialogStyle);
+            _progress.Indeterminate = true;
+
+            _progress.SetProgressStyle(ProgressDialogStyle.Spinner);
+            _progress.SetMessage("Loading");
+            _progress.SetCancelable(false);
+            _progress.Show();
+
+            string number = _number.Text;
+
+            //If input is valid
+            if (!string.IsNullOrEmpty(number))
+            {
+                //If internet connection works
+                if (await AzureConnectionFactory.Instance.IsConnected())
+                {
+                    //Try to retrieve account with number and set VMRegister Account 
+                    await _vmRegister.LogingAccount(number);
+
+                    Account account = _vmRegister.Account;
+
+                    //If account already exist in database login
+                    if (account != null)
+                    {
+                        //If the account succesfully login
+                        if (_vmRegister.Report == Resource.String.SuccessLogin)
+                        {
+                            //Save the login sesson in shared preferences
+                            SessionControllerFactory.Instance.SaveLoginSession(number);
+
+                            //Display login succesful
+                            Toast.MakeText(this, Resource.String.SuccessLogin, ToastLength.Short).Show();
+
+                            //Register the app for push notification
+                            GcmClient.CheckDevice(this);
+                            GcmClient.CheckManifest(this);
+                            GcmClient.Register(this, AccountBroadcastReceiver.senderIDs);
+
+                            Finish();
+                            ShowActivity(typeof(FNotification));
+                        }
+                        else
+                        {
+                            _progress.Dismiss();
+                            //Display why login not happened correctly
+                            RegisterMessage(_vmRegister.Report, _vmRegister.Report, this);
+                        }
+                    }
+                    //Else register the new Account
+                    else
+                    {
+                        //Create the new account
+                        account = new Account();
+                        account.Number = number;
+
+                        //Insert the new account in database
+                        await _vmRegister.RegisteringAccount(account);
+
+                        //If account is successfully inserted in database
+                        if (_vmRegister.Report == Resource.String.SuccessRegistration)
+                        {
+                            //Register the account for push notification
+                            GcmClient.CheckDevice(this);
+                            GcmClient.CheckManifest(this);
+                            GcmClient.Register(this, AccountBroadcastReceiver.senderIDs);
+
+                            //Save the new account created session in the shared preferences
+                            SessionControllerFactory.Instance.SaveLoginSession(number);
+
+                            //Display success registration
+                            RegisterMessage(Resource.String.SuccessRegistration, Resource.String.GoHome, this);
+                        }
+                        //Else display why registration not happened
+                        else
+                        {
+                            _progress.Dismiss();
+                            RegisterMessage(_vmRegister.Report, _vmRegister.Report, this);
+                        }
+                    }
+                }
+                //No internet connection occurence
+                else
+                {
+                    _progress.Dismiss();
+                    RegisterMessage(Resource.String.NoInternetConnection, Resource.String.NoInternetConnection, this);
+                }
+            }
+            //If input is invalid(empty string)
+            else
+            {
+                _progress.Dismiss();
+                RegisterMessage(Resource.String.FailRegistration, Resource.String.NumberFieldRequired, this);
+            }
+        }
