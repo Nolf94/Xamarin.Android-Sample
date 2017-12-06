@@ -1,0 +1,8 @@
+//Set a circle spinner loading 
+            _progress = new ProgressDialog(this, Resource.Style.ProgressDialogStyle);
+            _progress.Indeterminate = true;
+
+            _progress.SetProgressStyle(ProgressDialogStyle.Spinner);
+            _progress.SetMessage("Loading");
+            _progress.SetCancelable(false);
+            _progress.Show();
