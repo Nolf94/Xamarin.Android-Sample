@@ -1,0 +1,47 @@
+public void LoadAddressBookContacts()
+        {
+            Log.Debug("GetAllPhoneContacts", "Getting all Contacts");
+            Dictionary<string, string> contactsList = new Dictionary<string, string>();
+            Account phoneContact = null;
+            var uri = ContactsContract.CommonDataKinds.Phone.ContentUri;
+
+            string[] projection = { ContactsContract.Contacts.InterfaceConsts.Id,
+                                    ContactsContract.CommonDataKinds.Phone.Number,
+                                    ContactsContract.Contacts.InterfaceConsts.DisplayName,
+                                  };
+
+            var cursor = ApplicationContext.ContentResolver.Query(uri, projection,
+                                    null,
+                                    null,
+                                    null);
+
+            cursor.MoveToFirst();
+
+            while (cursor.IsAfterLast == false)
+            {
+
+                int contactID = cursor.GetInt(cursor.GetColumnIndex(ContactsContract.Contacts.InterfaceConsts.Id));
+                string Number = cursor.GetString(cursor.GetColumnIndex(ContactsContract.CommonDataKinds.Phone.Number));
+                string Number1 = Regex.Replace(Number, @"\+", "");
+                string contactNumber = Regex.Replace(Number1, @"\s", "");
+                string contactName = cursor.GetString(cursor.GetColumnIndex(ContactsContract.Contacts.InterfaceConsts.DisplayName));
+
+                phoneContact = new Account()
+                {
+                    Id = Convert.ToString(contactID),
+                    Name = contactName,
+                    Number = contactNumber
+                };
+
+                if (!contactsList.ContainsKey(phoneContact.Number))
+                    contactsList.Add(phoneContact.Number, phoneContact.Name);
+
+                cursor.MoveToNext();
+            }
+
+            cursor.Close();
+            cursor = null;
+            Log.Debug("GetAllPhoneContacts", "Got all Contacts");
+            List<KeyValuePair<string, string>> contacts = contactsList.ToList();
+            contacts.Sort((x, y) => x.Value.CompareTo(y.Value));
+        }
