@@ -1,4 +1,3 @@
-﻿// Copyright (c) Aidvanced Srl. All rights reserved.
 using Microsoft.Azure.Mobile.Server;
 using Microsoft.Azure.Mobile.Server.Config;
 using Microsoft.Azure.NotificationHubs;
