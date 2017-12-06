@@ -1,0 +1,7 @@
+ async public Task SendNotification(string type, string message, string deviceTag)
+        {
+            string path = "notifications/PostNotification";
+            string fromUser = AccountManager.Instance.Account.Number;
+            Dictionary<string, string> parameters = new Dictionary<string, string>() { { "type", type }, { "message", message }, { "deviceTag", deviceTag }, { "fromUser", fromUser } };
+            string result = await AzureConnectionFactory.Instance.GetClient().InvokeApiAsync<string, string>(path, null, HttpMethod.Post, parameters);
+        }
