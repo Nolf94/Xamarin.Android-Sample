@@ -1,0 +1,62 @@
+using Microsoft.WindowsAzure.MobileServices;
+using Plugin.Connectivity;
+using System.Threading.Tasks;
+
+//-------------------------------------------------------------------------//
+namespace WPC_Android.AppLayer
+{
+    //Factory class instance that initialize the connection with Azure Mobile Service
+    public class AzureConnectionFactory
+    {
+        //-------------------------------------------------------------------------//
+        //                             Data                                        //        
+        //-------------------------------------------------------------------------//
+        private MobileServiceClient _client;
+        private static AzureConnectionFactory _instance;
+        private const string _azureBackPoint = "YOUR_APP_BACKEND_LINK";
+        //-------------------------------------------------------------------------//
+
+        //-------------------------------------------------------------------------//
+        //                             Constructors                                //        
+        //-------------------------------------------------------------------------//
+
+        //Inizialize the Mobile Service client
+        public AzureConnectionFactory()
+        {
+            _client = new MobileServiceClient(_azureBackPoint);
+            CurrentPlatform.Init();
+        }
+        //-------------------------------------------------------------------------//
+
+        //-------------------------------------------------------------------------//
+        //                            Main functions                               //        
+        //-------------------------------------------------------------------------//
+        //Get the instance or create if not exist
+        public static AzureConnectionFactory Instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    _instance = new AzureConnectionFactory();
+                }
+
+                return _instance;
+            }
+        }
+        //-------------------------------------------------------------------------//
+        public MobileServiceClient GetClient()
+        {
+            return _client;
+        }
+        //-------------------------------------------------------------------------//
+        //Check the internet connection to Azure back end
+        public async Task<bool> IsConnected()
+        {
+            return await CrossConnectivity.Current.IsRemoteReachable(_azureBackPoint, 80, 6000);
+        }
+        //-------------------------------------------------------------------------//
+    }
+    //-------------------------------------------------------------------------//
+}
+
