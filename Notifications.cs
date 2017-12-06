@@ -1,4 +1,3 @@
-// Copyright (c) Aidvanced Srl. All rights reserved.
 using Microsoft.Azure.NotificationHubs;
 public class Notifications
 {
